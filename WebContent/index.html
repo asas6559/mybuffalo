@@ -1,0 +1,63 @@
+<script src="mybuffalo.js"></script>
+msg:<br />
+<div id="msg" style="width:68%;border-top:#000 1px solid;font-size:13px;line-height:15px;border-left:#000 1px solid;height:500px;overflow:scroll;float:left;"></div>
+<div style="width:28%;float:left;margin-left:5px;">
+	<div>method:</div><input id="method" type="text" style="width:100%;" value="com.TestSvc.normalMethod"/><br />
+	<div>data:</div><textarea id="data" style="width:100%;height:220px;" value="{a:1},{b:2},{c:3}"></textarea><br /><br />
+	<input type="button" id="clear" value="clear" style="width:48%;float:left;height:60px;"/>
+	<input type="button" id="post" value="post" style="width:48%;float:right;height:60px;"/>
+</div>
+<script>
+var data = document.getElementById("data");
+var post = document.getElementById("post");
+var method = document.getElementById("method");
+var msg = document.getElementById("msg");
+var clear = document.getElementById("clear");
+
+post.onclick = function(e){
+	var m = method.value;
+	var d = (data.value || "{}");
+	var da;
+	try{
+		eval("var da=["+d+"]");
+	}catch(e){
+		log(e);
+		alert("数据格式不对!");
+		data.focus();
+		return;
+	}
+	d = d.replace(/\n/ig,"\\n");
+	log("<span style='font-size:11px;color:#999;'>"+(new Date()).toLocaleString()+"</span>");
+    log("method:"+m);
+    log("data:"+d);
+	buffalo.remoteCall(m,da,function(r){
+		console.log(r);
+		log(JSON.stringify(r));
+	},function(r){
+        log("<span style='font-size:11px;color:#199;'>"+JSON.stringify(r)+"</span>");
+    });
+}
+
+clear.onclick = function(){
+	msg.innerHTML = "";
+}
+
+var log = function(res){
+	msg.innerHTML += res+"<br />";
+	console.log(res)
+	msg.scrollTop = 100000000;
+}
+
+data.onkeydown = function(e){
+	if(e.keyCode == 9){
+		var v = data.value;
+		var start = data.selectionStart;
+		var s = v.substring(0,data.selectionStart)+"    "+v.substring(data.selectionEnd);
+		data.value = s;
+		start += 4;
+		data.selectionStart = start;
+		data.selectionEnd = start;
+		return false;
+	}
+}
+</script>
